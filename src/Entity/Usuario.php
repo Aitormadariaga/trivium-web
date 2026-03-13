@@ -33,7 +33,7 @@ class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?string $password = null;
 
-    #[ORM\Column]
+    #[ORM\Column(options: ['default' => true])]
     private ?bool $activo = true;
 
     #[ORM\Column]
@@ -54,10 +54,17 @@ class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\ManyToMany(targetEntity: Sesion::class, inversedBy: 'usuarios')]
     private Collection $sesiones;
 
+    /**
+     * @var Collection<int, BackupPaciente>
+     */
+    #[ORM\OneToMany(targetEntity: BackupPaciente::class, mappedBy: 'usuario')]
+    private Collection $backupPacientes;
+
     public function __construct()
     {
         $this->usuarioPacientes = new ArrayCollection();
         $this->sesiones = new ArrayCollection();
+        $this->backupPacientes = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -227,6 +234,36 @@ class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
     public function removeSesione(Sesion $sesione): static
     {
         $this->sesiones->removeElement($sesione);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, BackupPaciente>
+     */
+    public function getBackupPacientes(): Collection
+    {
+        return $this->backupPacientes;
+    }
+
+    public function addBackupPaciente(BackupPaciente $backupPaciente): static
+    {
+        if (!$this->backupPacientes->contains($backupPaciente)) {
+            $this->backupPacientes->add($backupPaciente);
+            $backupPaciente->setUsuario($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBackupPaciente(BackupPaciente $backupPaciente): static
+    {
+        if ($this->backupPacientes->removeElement($backupPaciente)) {
+            // set the owning side to null (unless already changed)
+            if ($backupPaciente->getUsuario() === $this) {
+                $backupPaciente->setUsuario(null);
+            }
+        }
 
         return $this;
     }
