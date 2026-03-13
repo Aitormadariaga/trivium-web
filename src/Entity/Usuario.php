@@ -60,6 +60,9 @@ class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: BackupPaciente::class, mappedBy: 'usuario')]
     private Collection $backupPacientes;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $nombre = null;
+
     public function __construct()
     {
         $this->usuarioPacientes = new ArrayCollection();
@@ -264,6 +267,18 @@ class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
                 $backupPaciente->setUsuario(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getNombre(): ?string
+    {
+        return $this->nombre;
+    }
+
+    public function setNombre(?string $nombre): static
+    {
+        $this->nombre = $nombre;
 
         return $this;
     }

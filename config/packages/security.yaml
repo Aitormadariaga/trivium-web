@@ -16,6 +16,24 @@ security:
             # Ensure dev tools and static assets are always allowed
             pattern: ^/(_profiler|_wdt|assets|build)/
             security: false
+        # ── NUEVO ── Login API con JWT
+        api_login:
+            pattern: ^/api/login
+            stateless: true
+            json_login:
+                check_path: /api/login
+                username_path: username
+                password_path: password
+                success_handler: lexik_jwt_authentication.handler.authentication_success
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure
+
+        # ── NUEVO ── Rutas API protegidas con JWT
+        api:
+            pattern: ^/api
+            stateless: true
+            jwt: ~
+
+        # Tu firewall principal — para el dashboard web
         main:
             lazy: true
             provider: app_user_provider
@@ -28,6 +46,14 @@ security:
 
     # Note: Only the *first* matching rule is applied
     access_control:
+     # ── NUEVO ── Rutas públicas de la API
+        - { path: ^/api/login,    roles: PUBLIC_ACCESS }
+        - { path: ^/api/registro, roles: PUBLIC_ACCESS }
+        - { path: ^/api/crear-usuario-prueba, roles: PUBLIC_ACCESS }
+
+        # ── NUEVO ── Resto de rutas API necesitan token
+        - { path: ^/api,          roles: ROLE_USER }
+        
         # - { path: ^/admin, roles: ROLE_ADMIN }
         # - { path: ^/profile, roles: ROLE_USER }
 
