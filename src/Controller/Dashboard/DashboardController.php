@@ -1,30 +1,27 @@
 <?php
 namespace App\Controller\Dashboard;
 
-use App\Repository\PacienteRepository;
-use App\Repository\SesionRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 class DashboardController extends AbstractController
 {
-    // layout.html.twig usa 'dashboard'
     #[Route('/', name: 'dashboard')]
-    public function index(
-        PacienteRepository $pacienteRepo,
-        SesionRepository $sesionRepo
-    ): Response
+    public function index(): Response
     {
         return $this->render('dashboard/index.html.twig', [
-            'totalPacientes'  => $pacienteRepo->contarTodos(),
-            'totalSesiones'   => $sesionRepo->contarTodos(),
-            'ultimasSesiones' => $sesionRepo->findUltimas(5),
+            'totalPacientes'     => 0,
+            'totalSesiones'      => 0,
+            'totalUsuarios'      => 0,
+            'dispositivosActivos'=> 0,
+            'nuevosEsteMes'      => 0,
+            'sesionesEsteMes'    => 0,
+            'ultimasSesiones'    => [],
+            'pacientesRecientes' => [],
         ]);
     }
 
-    // layout.html.twig usa 'app_logout'
-    // Solo necesita la ruta — Symfony lo gestiona en security.yaml
     #[Route('/logout', name: 'app_logout')]
     public function logout(): void {}
 }
