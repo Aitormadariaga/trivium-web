@@ -40,6 +40,7 @@ class Sesion
     public function __construct()
     {
         $this->usuarios = new ArrayCollection();
+        $this->fecha = new \DateTime(); // ← añadir esto
     }
 
     public function getId(): ?int
