@@ -1,0 +1,567 @@
+{% extends 'layout.html.twig' %}
+
+{% block page_title %}Nuevo paciente{% endblock %}
+{% block page_subtitle %}Registro de nuevo paciente en el sistema{% endblock %}
+
+{% block topbar_actions %}
+    <a href="{{ path('pacientes_index') }}" class="btn btn--ghost">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Cancelar
+    </a>
+{% endblock %}
+
+{% block content %}
+
+<form class="patient-form" method="post" action="{{ path('pacientes_new') }}" novalidate>
+    <input type="hidden" name="_token" value="{{ csrf_token('paciente_new') }}">
+
+    {# ── PROGRESO ── #}
+    <div class="pf-progress">
+        <div class="pf-progress__step is-active" data-step="1">
+            <div class="pf-progress__dot">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <span>Identificación</span>
+        </div>
+        <div class="pf-progress__line"></div>
+        <div class="pf-progress__step" data-step="2">
+            <div class="pf-progress__dot">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            </div>
+            <span>Clínico</span>
+        </div>
+        <div class="pf-progress__line"></div>
+        <div class="pf-progress__step" data-step="3">
+            <div class="pf-progress__dot">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+            </div>
+            <span>Tratamiento</span>
+        </div>
+    </div>
+
+    {# ════════════════════════════
+       PASO 1 — IDENTIFICACIÓN
+    ════════════════════════════ #}
+    <div class="pf-step is-active" data-step="1">
+        <div class="card pf-card">
+            <div class="pf-card__header">
+                <div class="pf-card__icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </div>
+                <div>
+                    <h3 class="pf-card__title">Datos de identificación</h3>
+                    <p class="pf-card__subtitle">Información personal y documental del paciente</p>
+                </div>
+            </div>
+
+            <div class="pf-grid pf-grid--3">
+                <div class="form-group pf-col--2">
+                    <label class="form-label" for="nombre">
+                        Nombre <span class="form-label__req">*</span>
+                    </label>
+                    <input
+                        type="text"
+                        id="nombre"
+                        name="paciente[nombre]"
+                        class="form-input pf-input"
+                        placeholder="Nombre del paciente"
+                        value="{{ paciente is not null ? paciente.nombre : '' }}"
+                        required
+                        autocomplete="given-name"
+                    >
+                    <span class="form-error" id="nombre-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="dni">
+                        DNI <span class="form-label__req">*</span>
+                    </label>
+                    <input
+                        type="text"
+                        id="dni"
+                        name="paciente[dni]"
+                        class="form-input pf-input"
+                        placeholder="12345678A"
+                        value="{{ paciente is not null ? paciente.dni : '' }}"
+                        maxlength="10"
+                        required
+                        autocomplete="off"
+                    >
+                    <span class="form-error" id="dni-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="apellido1">
+                        Primer apellido <span class="form-label__req">*</span>
+                    </label>
+                    <input
+                        type="text"
+                        id="apellido1"
+                        name="paciente[apellido1]"
+                        class="form-input pf-input"
+                        placeholder="Primer apellido"
+                        value="{{ paciente is not null ? paciente.apellido1 : '' }}"
+                        required
+                        autocomplete="family-name"
+                    >
+                    <span class="form-error" id="apellido1-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="apellido2">Segundo apellido</label>
+                    <input
+                        type="text"
+                        id="apellido2"
+                        name="paciente[apellido2]"
+                        class="form-input pf-input"
+                        placeholder="Segundo apellido (opcional)"
+                        value="{{ paciente is not null ? paciente.apellido2 : '' }}"
+                        autocomplete="family-name"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="cic">
+                        CIC <span class="form-label__req">*</span>
+                        <span class="form-label__hint">Código interno de centro</span>
+                    </label>
+                    <input
+                        type="text"
+                        id="cic"
+                        name="paciente[cic]"
+                        class="form-input pf-input"
+                        placeholder="CIC-00000"
+                        value="{{ paciente is not null ? paciente.cic : '' }}"
+                        maxlength="25"
+                        required
+                        autocomplete="off"
+                    >
+                    <span class="form-error" id="cic-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="edad">
+                        Edad <span class="form-label__req">*</span>
+                    </label>
+                    <div class="pf-input-num">
+                        <button type="button" class="pf-input-num__btn" onclick="stepNum('edad', -1)">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        </button>
+                        <input
+                            type="number"
+                            id="edad"
+                            name="paciente[edad]"
+                            class="form-input pf-input pf-input--num"
+                            placeholder="—"
+                            value="{{ paciente is not null ? paciente.edad : '' }}"
+                            min="0"
+                            max="120"
+                            required
+                        >
+                        <button type="button" class="pf-input-num__btn" onclick="stepNum('edad', 1)">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        </button>
+                    </div>
+                    <span class="form-error" id="edad-error"></span>
+                </div>
+
+                <div class="form-group pf-col--3">
+                    <label class="form-label">Género</label>
+                    <div class="pf-radio-group">
+                        <label class="pf-radio">
+                            <input type="radio" name="paciente[genero]" value="Masculino" {% if paciente is not null and paciente.genero == 'Masculino' %}checked{% endif %}>
+                            <span class="pf-radio__box">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="4"/><path d="M16 10h4m-2-2v4"/></svg>
+                                Masculino
+                            </span>
+                        </label>
+                        <label class="pf-radio">
+                            <input type="radio" name="paciente[genero]" value="Femenino" {% if paciente is not null and paciente.genero == 'Femenino' %}checked{% endif %}>
+                            <span class="pf-radio__box">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M12 12v8m-3-3h6"/></svg>
+                                Femenino
+                            </span>
+                        </label>
+                        <label class="pf-radio">
+                            <input type="radio" name="paciente[genero]" value="No binario" {% if paciente is not null and paciente.genero == 'No binario' %}checked{% endif %}>
+                            <span class="pf-radio__box">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="4"/><path d="M18 21a6 6 0 0 0-12 0"/></svg>
+                                No binario
+                            </span>
+                        </label>
+                        <label class="pf-radio">
+                            <input type="radio" name="paciente[genero]" value="" {% if paciente is null or paciente.genero is null or paciente.genero == '' %}checked{% endif %}>
+                            <span class="pf-radio__box">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                No especificar
+                            </span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="pf-nav">
+            <span></span>
+            <button type="button" class="btn btn--primary pf-next" onclick="goStep(2)">
+                Continuar
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </button>
+        </div>
+    </div>
+
+    {# ════════════════════════════
+       PASO 2 — HISTORIAL CLÍNICO
+    ════════════════════════════ #}
+    <div class="pf-step" data-step="2">
+        <div class="card pf-card">
+            <div class="pf-card__header">
+                <div class="pf-card__icon pf-card__icon--green">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                </div>
+                <div>
+                    <h3 class="pf-card__title">Historial clínico</h3>
+                    <p class="pf-card__subtitle">Diagnóstico y medicación activa del paciente</p>
+                </div>
+            </div>
+
+            <div class="pf-grid pf-grid--1">
+                <div class="form-group">
+                    <label class="form-label" for="patologia">Patología / diagnóstico</label>
+                    <textarea
+                        id="patologia"
+                        name="paciente[patologia]"
+                        class="form-input pf-textarea"
+                        placeholder="Describe el diagnóstico o patología principal del paciente…"
+                        rows="3"
+                    >{{ paciente is not null ? paciente.patologia : '' }}</textarea>
+                    <span class="form-hint">Máx. 255 caracteres. Solo diagnóstico principal.</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="medicacion">Medicación activa</label>
+                    <textarea
+                        id="medicacion"
+                        name="paciente[medicacion]"
+                        class="form-input pf-textarea"
+                        placeholder="Lista los medicamentos activos relevantes para el tratamiento…"
+                        rows="3"
+                    >{{ paciente is not null ? paciente.medicacion : '' }}</textarea>
+                    <span class="form-hint">Incluye dosis si es relevante para el protocolo de estimulación.</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="pf-nav">
+            <button type="button" class="btn btn--ghost" onclick="goStep(1)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                Atrás
+            </button>
+            <button type="button" class="btn btn--primary" onclick="goStep(3)">
+                Continuar
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </button>
+        </div>
+    </div>
+
+    {# ════════════════════════════
+       PASO 3 — PARÁMETROS
+    ════════════════════════════ #}
+    <div class="pf-step" data-step="3">
+
+        {# Canal 1 #}
+        <div class="card pf-card">
+            <div class="pf-card__header">
+                <div class="pf-card__icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+                </div>
+                <div>
+                    <h3 class="pf-card__title">Parámetros de tratamiento</h3>
+                    <p class="pf-card__subtitle">Configuración base del dispositivo para este paciente</p>
+                </div>
+            </div>
+
+            <div class="pf-canal">
+                <div class="pf-canal__label">
+                    <span class="canal-label">C1</span>
+                    <span class="pf-canal__name">Canal 1 — Principal</span>
+                </div>
+
+                <div class="pf-grid pf-grid--2">
+                    <div class="form-group">
+                        <label class="form-label" for="intensidad">
+                            Intensidad <span class="form-label__req">*</span>
+                            <span class="pf-slider__val" id="intensidad-val">{{ paciente is not null ? paciente.intensidad : 0 }} mA</span>
+                        </label>
+                        <div class="pf-slider-wrap">
+                            <input
+                                type="range"
+                                id="intensidad"
+                                name="paciente[intensidad]"
+                                class="pf-slider"
+                                min="0"
+                                max="20"
+                                step="1"
+                                value="{{ paciente is not null ? paciente.intensidad : 0 }}"
+                                oninput="updateSlider('intensidad', this.value, 'mA')"
+                                required
+                            >
+                            <div class="pf-slider__ticks">
+                                <span>0</span><span>5</span><span>10</span><span>15</span><span>20</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="tiempo">
+                            Duración <span class="form-label__req">*</span>
+                            <span class="pf-slider__val" id="tiempo-val">{{ paciente is not null ? paciente.tiempo : 0 }} min</span>
+                        </label>
+                        <div class="pf-slider-wrap">
+                            <input
+                                type="range"
+                                id="tiempo"
+                                name="paciente[tiempo]"
+                                class="pf-slider"
+                                min="0"
+                                max="60"
+                                step="5"
+                                value="{{ paciente is not null ? paciente.tiempo : 0 }}"
+                                oninput="updateSlider('tiempo', this.value, 'min')"
+                                required
+                            >
+                            <div class="pf-slider__ticks">
+                                <span>0</span><span>15</span><span>30</span><span>45</span><span>60</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Canal 2 toggle #}
+        <div class="card pf-card pf-card--canal2">
+            <div class="pf-canal2-header">
+                <div class="pf-canal__label">
+                    <span class="canal-label canal-label--2">C2</span>
+                    <div>
+                        <span class="pf-canal__name">Canal 2 — Opcional</span>
+                        <span class="pf-canal__sub">Activa si el protocolo requiere doble canal</span>
+                    </div>
+                </div>
+                <label class="pf-toggle" for="canal2-toggle">
+                    <input type="checkbox" id="canal2-toggle" onchange="toggleCanal2(this)">
+                    <span class="pf-toggle__track"></span>
+                </label>
+            </div>
+
+            <div class="pf-canal2-body" id="canal2-body" style="display:none">
+                <div class="pf-grid pf-grid--2">
+                    <div class="form-group">
+                        <label class="form-label" for="intensidad2">
+                            Intensidad C2
+                            <span class="pf-slider__val" id="intensidad2-val">0 mA</span>
+                        </label>
+                        <div class="pf-slider-wrap">
+                            <input
+                                type="range"
+                                id="intensidad2"
+                                name="paciente[intensidad2]"
+                                class="pf-slider pf-slider--c2"
+                                min="0"
+                                max="20"
+                                step="1"
+                                value="{{ paciente is not null ? paciente.intensidad2 : 0 }}"
+                                oninput="updateSlider('intensidad2', this.value, 'mA')"
+                            >
+                            <div class="pf-slider__ticks">
+                                <span>0</span><span>5</span><span>10</span><span>15</span><span>20</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="tiempo2">
+                            Duración C2
+                            <span class="pf-slider__val" id="tiempo2-val">0 min</span>
+                        </label>
+                        <div class="pf-slider-wrap">
+                            <input
+                                type="range"
+                                id="tiempo2"
+                                name="paciente[tiempo2]"
+                                class="pf-slider pf-slider--c2"
+                                min="0"
+                                max="60"
+                                step="5"
+                                value="{{ paciente is not null ? paciente.tiempo2 : 0 }}"
+                                oninput="updateSlider('tiempo2', this.value, 'min')"
+                            >
+                            <div class="pf-slider__ticks">
+                                <span>0</span><span>15</span><span>30</span><span>45</span><span>60</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Resumen antes de guardar #}
+        <div class="card pf-card pf-summary" id="pf-summary">
+            <div class="pf-summary__title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                Resumen del registro
+            </div>
+            <div class="pf-summary__grid">
+                <div class="pf-summary__item">
+                    <span class="pf-summary__label">Nombre completo</span>
+                    <span class="pf-summary__val" id="sum-nombre">—</span>
+                </div>
+                <div class="pf-summary__item">
+                    <span class="pf-summary__label">DNI</span>
+                    <span class="pf-summary__val" id="sum-dni">—</span>
+                </div>
+                <div class="pf-summary__item">
+                    <span class="pf-summary__label">CIC</span>
+                    <span class="pf-summary__val" id="sum-cic">—</span>
+                </div>
+                <div class="pf-summary__item">
+                    <span class="pf-summary__label">Edad</span>
+                    <span class="pf-summary__val" id="sum-edad">—</span>
+                </div>
+                <div class="pf-summary__item">
+                    <span class="pf-summary__label">Patología</span>
+                    <span class="pf-summary__val" id="sum-patologia">—</span>
+                </div>
+                <div class="pf-summary__item">
+                    <span class="pf-summary__label">Canal 1</span>
+                    <span class="pf-summary__val" id="sum-c1">—</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="pf-nav">
+            <button type="button" class="btn btn--ghost" onclick="goStep(2)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                Atrás
+            </button>
+            <button type="submit" class="btn btn--primary btn--save">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                Guardar paciente
+            </button>
+        </div>
+    </div>
+
+</form>
+
+{% endblock %}
+
+{% block javascripts %}
+<script>
+// ── PASOS ──
+function goStep(target) {
+    const steps = document.querySelectorAll('.pf-step');
+    const dots  = document.querySelectorAll('.pf-progress__step');
+
+    // Validar paso actual antes de avanzar
+    const currentStep = document.querySelector('.pf-step.is-active');
+    const currentNum  = parseInt(currentStep.dataset.step);
+
+    if (target > currentNum && !validateStep(currentNum)) return;
+
+    steps.forEach(s => s.classList.remove('is-active'));
+    dots.forEach((d, i) => {
+        d.classList.toggle('is-active', i < target);
+        d.classList.toggle('is-done',   i < target - 1);
+    });
+    document.querySelector(`.pf-step[data-step="${target}"]`).classList.add('is-active');
+
+    if (target === 3) updateSummary();
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── VALIDACIÓN POR PASO ──
+function validateStep(step) {
+    let valid = true;
+    if (step === 1) {
+        valid = checkRequired('nombre',   'El nombre es obligatorio')
+              & checkRequired('apellido1','El primer apellido es obligatorio')
+              & checkRequired('dni',      'El DNI es obligatorio')
+              & checkRequired('cic',      'El CIC es obligatorio')
+              & checkRequired('edad',     'La edad es obligatoria');
+    }
+    return valid;
+}
+
+function checkRequired(id, msg) {
+    const el  = document.getElementById(id);
+    const err = document.getElementById(id + '-error');
+    if (!el.value.trim()) {
+        el.classList.add('is-invalid');
+        if (err) err.textContent = msg;
+        return false;
+    }
+    el.classList.remove('is-invalid');
+    if (err) err.textContent = '';
+    return true;
+}
+
+// Limpiar error al escribir
+document.querySelectorAll('.pf-input').forEach(el => {
+    el.addEventListener('input', () => {
+        el.classList.remove('is-invalid');
+        const err = document.getElementById(el.id + '-error');
+        if (err) err.textContent = '';
+    });
+});
+
+// ── SLIDERS ──
+function updateSlider(id, val, unit) {
+    document.getElementById(id + '-val').textContent = `${val} ${unit}`;
+    const input = document.getElementById(id);
+    const pct   = ((val - input.min) / (input.max - input.min)) * 100;
+    input.style.setProperty('--pct', pct + '%');
+}
+
+// Inicializar sliders
+['intensidad','tiempo','intensidad2','tiempo2'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const unit = id.startsWith('tiempo') ? 'min' : 'mA';
+    updateSlider(id, el.value, unit);
+});
+
+// ── CONTADOR NUMÉRICO ──
+function stepNum(id, delta) {
+    const el  = document.getElementById(id);
+    const val = (parseInt(el.value) || 0) + delta;
+    el.value  = Math.max(el.min || 0, Math.min(el.max || 999, val));
+}
+
+// ── CANAL 2 ──
+function toggleCanal2(cb) {
+    const body = document.getElementById('canal2-body');
+    body.style.display = cb.checked ? 'block' : 'none';
+    if (!cb.checked) {
+        document.getElementById('intensidad2').value = 0;
+        document.getElementById('tiempo2').value     = 0;
+        updateSlider('intensidad2', 0, 'mA');
+        updateSlider('tiempo2',     0, 'min');
+    }
+}
+
+// ── RESUMEN ──
+function updateSummary() {
+    const g = id => (document.getElementById(id)?.value ?? '').trim();
+
+    const nombre = [g('nombre'), g('apellido1'), g('apellido2')].filter(Boolean).join(' ');
+    document.getElementById('sum-nombre').textContent    = nombre    || '—';
+    document.getElementById('sum-dni').textContent       = g('dni')  || '—';
+    document.getElementById('sum-cic').textContent       = g('cic')  || '—';
+    document.getElementById('sum-edad').textContent      = g('edad') ? g('edad') + ' años' : '—';
+    document.getElementById('sum-patologia').textContent = g('patologia') || 'No especificada';
+    document.getElementById('sum-c1').textContent        = `${g('intensidad')} mA · ${g('tiempo')} min`;
+}
+</script>
+{% endblock %}
