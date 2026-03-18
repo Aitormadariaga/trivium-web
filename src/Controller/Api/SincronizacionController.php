@@ -123,98 +123,85 @@ class SincronizacionController extends AbstractController
         $usuarioActual = $security->getUser();
         $datos = json_decode($request->getContent(), true);
 
-        // decision: "mantener" → usar versión tablet
-        // decision: "sobreescribir" → usar versión servidor
-        $decision   = $datos['decision'];
-        $pacienteId = $datos['pacienteId'];
-        $paciente   = $pacienteRepo->find($pacienteId);
+        $paciente = $pacienteRepo->find($datos['pacienteId']);
 
         if (!$paciente) {
             return $this->json(['error' => 'Paciente no encontrado'], 404);
         }
 
-        if ($decision === 'mantener') {
-            // Guardar los cambios de la tablet en backup_paciente
+        if ($datos['decision'] === 'mantener') {
             $this->guardarBackup($datos['versionTablet'], $paciente, $usuarioActual, $em);
-        }
-        // Si decision === 'sobreescribir'
-        // No hacemos nada → los cambios del otro médico ya están en backup_paciente
-
-        // Si había una sesión pendiente → guardarla siempre independientemente del conflicto
-        if (!empty($datos['sesion'])) {
-            $this->guardarSesion($datos['sesion'], $paciente, $usuarioActual, $em);
         }
 
         $em->flush();
-
         return $this->json(['mensaje' => 'Conflicto resuelto correctamente']);
     }
 
     // ============================================
-// POST /api/sincronizar/sesiones
-// La tablet sube toda su tabla de sesiones
-// El servidor inserta solo las que no existen
-// ============================================
-#[Route('/sincronizar/sesiones', name: 'api_sincronizar_sesiones', methods: ['POST'])]
-public function sincronizarSesiones(
-    Request $request,
-    EntityManagerInterface $em,
-    PacienteRepository $pacienteRepo,
-    SesionRepository $sesionRepo,
-    Security $security
-): JsonResponse
-{
-    /** @var \App\Entity\Usuario $usuarioActual */
-    $usuarioActual = $security->getUser();
-    $datos = json_decode($request->getContent(), true);
+    // POST /api/sincronizar/sesiones
+    // La tablet sube toda su tabla de sesiones
+    // El servidor inserta solo las que no existen
+    // ============================================
+    #[Route('/sincronizar/sesiones', name: 'api_sincronizar_sesiones', methods: ['POST'])]
+    public function sincronizarSesiones(
+        Request $request,
+        EntityManagerInterface $em,
+        PacienteRepository $pacienteRepo,
+        SesionRepository $sesionRepo,
+        Security $security
+    ): JsonResponse
+    {
+        /** @var \App\Entity\Usuario $usuarioActual */
+        $usuarioActual = $security->getUser();
+        $datos = json_decode($request->getContent(), true);
 
-    $resultado = [
-        'insertadas' => 0,
-        'ignoradas'  => 0,
-        'errores'    => [],
-    ];
+        $resultado = [
+            'insertadas' => 0,
+            'ignoradas'  => 0,
+            'errores'    => [],
+        ];
 
-    foreach ($datos['sesiones'] ?? [] as $datosSesion) {
-        $paciente = $pacienteRepo->find($datosSesion['pacienteId']);
+        foreach ($datos['sesiones'] ?? [] as $datosSesion) {
+            $paciente = $pacienteRepo->find($datosSesion['pacienteId']);
 
-        if (!$paciente) {
-            $resultado['errores'][] = [
-                'pacienteId' => $datosSesion['pacienteId'],
-                'motivo'     => 'Paciente no encontrado'
-            ];
-            continue;
+            if (!$paciente) {
+                $resultado['errores'][] = [
+                    'pacienteId' => $datosSesion['pacienteId'],
+                    'motivo'     => 'Paciente no encontrado'
+                ];
+                continue;
+            }
+
+            // Comprobar si ya existe usando fecha + paciente + dispositivo
+            // como identificador único
+            $existe = $sesionRepo->findOneBy([
+                'paciente'    => $paciente,
+                'fecha'       => new \DateTime($datosSesion['fecha']),
+                'dispositivo' => $datosSesion['dispositivo'],
+            ]);
+
+            if ($existe) {
+                $resultado['ignoradas']++;
+                continue;
+            }
+
+            // No existe → insertar
+            $sesion = new Sesion();
+            $sesion->setPaciente($paciente);
+            $sesion->addUsuario($usuarioActual);
+            $sesion->setDispositivo($datosSesion['dispositivo'] ?? 'Desconocido');
+            $sesion->setFecha(new \DateTime($datosSesion['fecha']));
+            $sesion->setIntensidad($datosSesion['intensidad'] ?? 0);
+            $sesion->setTiempo($datosSesion['tiempo'] ?? 0);
+            $em->persist($sesion);
+
+            $resultado['insertadas']++;
         }
 
-        // Comprobar si ya existe usando fecha + paciente + dispositivo
-        // como identificador único
-        $existe = $sesionRepo->findOneBy([
-            'paciente'    => $paciente,
-            'fecha'       => new \DateTime($datosSesion['fecha']),
-            'dispositivo' => $datosSesion['dispositivo'],
-        ]);
+        $em->flush();
 
-        if ($existe) {
-            $resultado['ignoradas']++;
-            continue;
-        }
-
-        // No existe → insertar
-        $sesion = new Sesion();
-        $sesion->setPaciente($paciente);
-        $sesion->addUsuario($usuarioActual);
-        $sesion->setDispositivo($datosSesion['dispositivo'] ?? 'Desconocido');
-        $sesion->setFecha(new \DateTime($datosSesion['fecha']));
-        $sesion->setIntensidad($datosSesion['intensidad'] ?? 0);
-        $sesion->setTiempo($datosSesion['tiempo'] ?? 0);
-        $em->persist($sesion);
-
-        $resultado['insertadas']++;
+        return $this->json($resultado);
     }
-
-    $em->flush();
-
-    return $this->json($resultado);
-}
 
     // ============================================
     // Método privado — Guardar backup
@@ -256,6 +243,7 @@ public function sincronizarSesiones(
         $em->persist($backup);
     }
 
+    /*
     // ============================================
     // Método privado — Guardar sesión
     // ============================================
@@ -273,7 +261,7 @@ public function sincronizarSesiones(
         $sesion->setIntensidad($datosSesion['intensidad'] ?? 0);
         $sesion->setTiempo($datosSesion['tiempo'] ?? 0);
         // ↑ Sin fecha → depende del constructor de Sesion
-    
+
         $em->persist($sesion);
-    }
+    }*/
 }
