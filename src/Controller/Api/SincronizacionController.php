@@ -6,6 +6,7 @@ use App\Entity\Sesion;
 use App\Enum\EstadoBackup;
 use App\Repository\BackupPacienteRepository;
 use App\Repository\PacienteRepository;
+use App\Repository\SesionRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -150,6 +151,72 @@ class SincronizacionController extends AbstractController
     }
 
     // ============================================
+// POST /api/sincronizar/sesiones
+// La tablet sube toda su tabla de sesiones
+// El servidor inserta solo las que no existen
+// ============================================
+#[Route('/sincronizar/sesiones', name: 'api_sincronizar_sesiones', methods: ['POST'])]
+public function sincronizarSesiones(
+    Request $request,
+    EntityManagerInterface $em,
+    PacienteRepository $pacienteRepo,
+    SesionRepository $sesionRepo,
+    Security $security
+): JsonResponse
+{
+    /** @var \App\Entity\Usuario $usuarioActual */
+    $usuarioActual = $security->getUser();
+    $datos = json_decode($request->getContent(), true);
+
+    $resultado = [
+        'insertadas' => 0,
+        'ignoradas'  => 0,
+        'errores'    => [],
+    ];
+
+    foreach ($datos['sesiones'] ?? [] as $datosSesion) {
+        $paciente = $pacienteRepo->find($datosSesion['pacienteId']);
+
+        if (!$paciente) {
+            $resultado['errores'][] = [
+                'pacienteId' => $datosSesion['pacienteId'],
+                'motivo'     => 'Paciente no encontrado'
+            ];
+            continue;
+        }
+
+        // Comprobar si ya existe usando fecha + paciente + dispositivo
+        // como identificador único
+        $existe = $sesionRepo->findOneBy([
+            'paciente'    => $paciente,
+            'fecha'       => new \DateTime($datosSesion['fecha']),
+            'dispositivo' => $datosSesion['dispositivo'],
+        ]);
+
+        if ($existe) {
+            $resultado['ignoradas']++;
+            continue;
+        }
+
+        // No existe → insertar
+        $sesion = new Sesion();
+        $sesion->setPaciente($paciente);
+        $sesion->addUsuario($usuarioActual);
+        $sesion->setDispositivo($datosSesion['dispositivo'] ?? 'Desconocido');
+        $sesion->setFecha(new \DateTime($datosSesion['fecha']));
+        $sesion->setIntensidad($datosSesion['intensidad'] ?? 0);
+        $sesion->setTiempo($datosSesion['tiempo'] ?? 0);
+        $em->persist($sesion);
+
+        $resultado['insertadas']++;
+    }
+
+    $em->flush();
+
+    return $this->json($resultado);
+}
+
+    // ============================================
     // Método privado — Guardar backup
     // ============================================
     private function guardarBackup(
@@ -205,7 +272,8 @@ class SincronizacionController extends AbstractController
         $sesion->setDispositivo($datosSesion['dispositivo'] ?? 'Desconocido');
         $sesion->setIntensidad($datosSesion['intensidad'] ?? 0);
         $sesion->setTiempo($datosSesion['tiempo'] ?? 0);
-
+        // ↑ Sin fecha → depende del constructor de Sesion
+    
         $em->persist($sesion);
     }
 }
