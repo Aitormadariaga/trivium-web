@@ -205,6 +205,45 @@ class SincronizacionController extends AbstractController
     }
 
     // ============================================
+    // GET /api/sincronizar/eliminaciones-rechazadas
+    // Devuelve pacientes cuya eliminación
+    // no fue confirmada por el admin esta semana
+    // ============================================
+    #[Route('/sincronizar/eliminaciones-rechazadas', name: 'api_eliminaciones_rechazadas', methods: ['GET'])]
+    public function eliminacionesRechazadas(
+        BackupPacienteRepository $backupRepo,
+        PacienteRepository $pacienteRepo,
+        Security $security
+    ): JsonResponse
+    {
+        /** @var \App\Entity\Usuario $usuarioActual */
+        $usuarioActual = $security->getUser();
+    
+        // Buscar backups de este usuario con estado=ELIMINADO de esta semana
+        $backups = $backupRepo->findEliminacionesPendientesDeUsuario($usuarioActual);
+    
+        $rechazados = [];
+        foreach ($backups as $backup) {
+            // Si el paciente sigue existiendo → el admin no confirmó la eliminación
+            $paciente = $pacienteRepo->find($backup->getPaciente()->getId());
+    
+            if ($paciente) {
+                $rechazados[] = [
+                    'pacienteId' => $paciente->getId(),
+                    'nombre'     => $paciente->getNombre(),
+                    'apellido1'  => $paciente->getApellido1(),
+                    'dni'        => $paciente->getDni(),
+                ];
+            }
+        }
+    
+        return $this->json([
+            'rechazados' => $rechazados,
+            'total'      => count($rechazados)
+        ]);
+    }
+
+    // ============================================
     // Método privado — Guardar backup
     // ============================================
     private function guardarBackup(
