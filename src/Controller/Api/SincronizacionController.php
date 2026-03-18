@@ -94,10 +94,11 @@ class SincronizacionController extends AbstractController
             // ── Sin conflicto → guardar en backup_paciente ──
             $this->guardarBackup($cambio, $paciente, $usuarioActual, $em);
 
+            /*
             // ── Si es una sesión → guardarla directamente ──
             if (!empty($cambio['sesion'])) {
                 $this->guardarSesion($cambio['sesion'], $paciente, $usuarioActual, $em);
-            }
+            }*/
 
             $resultado['sincronizados'][] = $cambio['pacienteId'];
         }
