@@ -72,6 +72,9 @@ class BackupPaciente
     #[ORM\ManyToOne(nullable: true, onDelete: 'SET NULL')]
     private ?Paciente $paciente = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?bool $aplicar = null;
+
     public function __construct()
     {
         $this->fechaActualizacion = new \DateTime();
@@ -308,6 +311,18 @@ class BackupPaciente
     public function setPaciente(?Paciente $paciente): static
     {
         $this->paciente = $paciente;
+
+        return $this;
+    }
+
+    public function isAplicar(): ?bool
+    {
+        return $this->aplicar;
+    }
+
+    public function setAplicar(?bool $aplicar): static
+    {
+        $this->aplicar = $aplicar;
 
         return $this;
     }

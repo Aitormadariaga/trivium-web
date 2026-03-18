@@ -51,7 +51,14 @@ use Symfony\Component\Console\Output\OutputInterface;
 
                 // Si el admin eligió uno específico, usar ese
                 // Si no, usar el más reciente
-                if ($backup->isAplicar() || !isset($porPaciente[$id])) {
+                if ($backup->getAplicar() === true) {
+                    // Admin eligió explícitamente este → tiene prioridad siempre
+                    $porPaciente[$id] = $backup;
+                } elseif (!isset($porPaciente[$id])
+                  || $porPaciente[$id]->getAplicar() !== true) {
+                    // Si no hay ninguno elegido por el admin todavía
+                    // → guardar este como candidato (el más reciente gana
+                    //   porque findEstaSemana() ordena DESC)
                     $porPaciente[$id] = $backup;
                 }
             }
@@ -62,6 +69,11 @@ use Symfony\Component\Console\Output\OutputInterface;
             $paciente = $this->pacienteRepo->find($idPaciente);
             if (!$paciente) continue;
 
+
+            $paciente->setCic($backup->getCic());
+            // ↑ faltaba setCic en tu versión actual
+            $paciente->setDni($backup->getDni());
+            // ↑ faltaba setDni también
             $paciente->setNombre($backup->getNombre());
             $paciente->setApellido1($backup->getApellido1());
             $paciente->setApellido2($backup->getApellido2());
