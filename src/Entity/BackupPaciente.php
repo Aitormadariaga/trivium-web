@@ -69,6 +69,16 @@ class BackupPaciente
     #[ORM\Column(options: ['default' => false])]
     private ?bool $conservar = false;
 
+    #[ORM\ManyToOne(nullable: true, onDelete: 'SET NULL')]
+    private ?Paciente $paciente = null;
+
+    public function __construct()
+    {
+        $this->fechaActualizacion = new \DateTime();
+    }
+
+
+
     public function getId(): ?int
     {
         return $this->id;
@@ -289,4 +299,18 @@ class BackupPaciente
 
         return $this;
     }
+
+    public function getPaciente(): ?Paciente
+    {
+        return $this->paciente;
+    }
+
+    public function setPaciente(?Paciente $paciente): static
+    {
+        $this->paciente = $paciente;
+
+        return $this;
+    }
+
+
 }

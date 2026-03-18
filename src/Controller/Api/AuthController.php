@@ -149,6 +149,8 @@ public function crearUsuarioPrueba(
     $usuario = new Usuario();
     $usuario->setUsername('admin');
     $usuario->setRoles(['ROLE_ADMIN']);
+    $usuario->setFechaCreacion(new \DateTime()); // ← añadir esto
+    $usuario->setActivo(true);                   // ← añadir esto
 
     $hash = $hasher->hashPassword($usuario, '1234');
     $usuario->setPassword($hash);

@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\BackupPaciente;
+use App\Enum\EstadoBackup;
 use App\Entity\Usuario;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -122,6 +123,23 @@ class BackupPacienteRepository extends ServiceEntityRepository
             ->setParameter('idPaciente', $idPaciente)
             ->setParameter('usuario', $usuario)
             ->orderBy('b.fechaActualizacion', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    // Buscar backups de un usuario con estado=ELIMINADO de esta semana
+    // Se usa para detectar eliminaciones que el admin no confirmó
+    public function findEliminacionesPendientesDeUsuario(Usuario $usuario): array
+    {
+        $inicioSemana = new \DateTime('monday this week');
+
+        return $this->createQueryBuilder('b')
+            ->where('b.usuario = :usuario')
+            ->andWhere('b.estado = :estado')
+            ->andWhere('b.fechaActualizacion >= :inicio')
+            ->setParameter('usuario', $usuario)
+            ->setParameter('estado', EstadoBackup::ELIMINADO)
+            ->setParameter('inicio', $inicioSemana)
             ->getQuery()
             ->getResult();
     }
