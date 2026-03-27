@@ -6,11 +6,16 @@ use App\Repository\UsuarioRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UsuarioRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_USERNAME', fields: ['username'])]
+#[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
+#[UniqueEntity(fields: ['username'], message: 'Ya existe una cuenta con ese nombre de usuario.')]
+#[UniqueEntity(fields: ['email'], message: 'Ya existe una cuenta con ese email.')]
 class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -19,7 +24,29 @@ class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
     private ?int $id = null;
 
     #[ORM\Column(length: 180)]
+    #[Assert\NotBlank]
+    #[Assert\Length(min: 3, max: 180)]
     private ?string $username = null;
+
+    // ── NUEVO: Email ──────────────────────────────────────────────
+    #[ORM\Column(length: 255)]
+    #[Assert\NotBlank]
+    #[Assert\Email(message: 'El email {{ value }} no es válido.')]
+    private ?string $email = null;
+
+    // ── NUEVO: Verificación de cuenta ─────────────────────────────
+    #[ORM\Column(options: ['default' => false])]
+    private bool $emailVerified = false;
+
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $verificationToken = null;
+
+    // ── NUEVO: Token de reset de contraseña (opcional, para el futuro) ─
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $resetPasswordToken = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $resetPasswordTokenExpiresAt = null;
 
     /**
      * @var list<string> The user roles
@@ -60,14 +87,12 @@ class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: BackupPaciente::class, mappedBy: 'usuario')]
     private Collection $backupPacientes;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $nombre = null;
-
     public function __construct()
     {
         $this->usuarioPacientes = new ArrayCollection();
         $this->sesiones = new ArrayCollection();
         $this->backupPacientes = new ArrayCollection();
+        $this->fecha_creacion = new \DateTime();
     }
 
     public function getId(): ?int
@@ -83,7 +108,6 @@ class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
     public function setUsername(string $username): static
     {
         $this->username = $username;
-
         return $this;
     }
 
@@ -105,7 +129,6 @@ class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
         $roles = $this->roles;
         // guarantee every user at least has ROLE_USER
         $roles[] = 'ROLE_USER';
-
         return array_unique($roles);
     }
 
@@ -115,8 +138,12 @@ class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
     public function setRoles(array $roles): static
     {
         $this->roles = $roles;
-
         return $this;
+    }
+
+    public function isAdmin(): bool
+    {
+        return in_array('ROLE_ADMIN', $this->getRoles(), true);
     }
 
     /**
@@ -130,26 +157,90 @@ class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPassword(string $password): static
     {
         $this->password = $password;
-
         return $this;
     }
 
     /**
-     * Ensure the session doesn't contain actual password hashes by CRC32C-hashing them, as supported since Symfony 7.3.
+     * Ensure the session doesn't contain actual password hashes.
      */
     public function __serialize(): array
     {
         $data = (array) $this;
         $data["\0".self::class."\0password"] = hash('crc32c', $this->password);
-
         return $data;
     }
 
     #[\Deprecated]
-    public function eraseCredentials(): void
+    public function eraseCredentials(): void {}
+
+    // ── Email ──────────────────────────────────────────────────────
+
+    public function getEmail(): ?string
     {
-        // @deprecated, to be removed when upgrading to Symfony 8
+        return $this->email;
     }
+
+    public function setEmail(string $email): static
+    {
+        $this->email = $email;
+        return $this;
+    }
+
+    // ── Verificación ───────────────────────────────────────────────
+
+    public function isEmailVerified(): bool
+    {
+        return $this->emailVerified;
+    }
+
+    public function setEmailVerified(bool $emailVerified): static
+    {
+        $this->emailVerified = $emailVerified;
+        return $this;
+    }
+
+    public function getVerificationToken(): ?string
+    {
+        return $this->verificationToken;
+    }
+
+    public function setVerificationToken(?string $verificationToken): static
+    {
+        $this->verificationToken = $verificationToken;
+        return $this;
+    }
+
+    public function generateVerificationToken(): static
+    {
+        $this->verificationToken = bin2hex(random_bytes(32));
+        return $this;
+    }
+
+    // ── Reset password ─────────────────────────────────────────────
+
+    public function getResetPasswordToken(): ?string
+    {
+        return $this->resetPasswordToken;
+    }
+
+    public function setResetPasswordToken(?string $token): static
+    {
+        $this->resetPasswordToken = $token;
+        return $this;
+    }
+
+    public function getResetPasswordTokenExpiresAt(): ?\DateTimeImmutable
+    {
+        return $this->resetPasswordTokenExpiresAt;
+    }
+
+    public function setResetPasswordTokenExpiresAt(?\DateTimeImmutable $at): static
+    {
+        $this->resetPasswordTokenExpiresAt = $at;
+        return $this;
+    }
+
+    // ── Campos originales ──────────────────────────────────────────
 
     public function isActivo(): ?bool
     {
@@ -159,7 +250,6 @@ class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
     public function setActivo(bool $activo): static
     {
         $this->activo = $activo;
-
         return $this;
     }
 
@@ -171,7 +261,6 @@ class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
     public function setFechaCreacion(\DateTime $fecha_creacion): static
     {
         $this->fecha_creacion = $fecha_creacion;
-
         return $this;
     }
 
@@ -183,7 +272,6 @@ class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
     public function setUltimoAcceso(?\DateTime $ultimo_acceso): static
     {
         $this->ultimo_acceso = $ultimo_acceso;
-
         return $this;
     }
 
@@ -195,28 +283,6 @@ class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->usuarioPacientes;
     }
 
-    public function addUsuarioPaciente(UsuarioPaciente $usuarioPaciente): static
-    {
-        if (!$this->usuarioPacientes->contains($usuarioPaciente)) {
-            $this->usuarioPacientes->add($usuarioPaciente);
-            $usuarioPaciente->setUsuario($this);
-        }
-
-        return $this;
-    }
-
-    public function removeUsuarioPaciente(UsuarioPaciente $usuarioPaciente): static
-    {
-        if ($this->usuarioPacientes->removeElement($usuarioPaciente)) {
-            // set the owning side to null (unless already changed)
-            if ($usuarioPaciente->getUsuario() === $this) {
-                $usuarioPaciente->setUsuario(null);
-            }
-        }
-
-        return $this;
-    }
-
     /**
      * @return Collection<int, Sesion>
      */
@@ -225,61 +291,11 @@ class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->sesiones;
     }
 
-    public function addSesione(Sesion $sesione): static
-    {
-        if (!$this->sesiones->contains($sesione)) {
-            $this->sesiones->add($sesione);
-        }
-
-        return $this;
-    }
-
-    public function removeSesione(Sesion $sesione): static
-    {
-        $this->sesiones->removeElement($sesione);
-
-        return $this;
-    }
-
     /**
      * @return Collection<int, BackupPaciente>
      */
     public function getBackupPacientes(): Collection
     {
         return $this->backupPacientes;
-    }
-
-    public function addBackupPaciente(BackupPaciente $backupPaciente): static
-    {
-        if (!$this->backupPacientes->contains($backupPaciente)) {
-            $this->backupPacientes->add($backupPaciente);
-            $backupPaciente->setUsuario($this);
-        }
-
-        return $this;
-    }
-
-    public function removeBackupPaciente(BackupPaciente $backupPaciente): static
-    {
-        if ($this->backupPacientes->removeElement($backupPaciente)) {
-            // set the owning side to null (unless already changed)
-            if ($backupPaciente->getUsuario() === $this) {
-                $backupPaciente->setUsuario(null);
-            }
-        }
-
-        return $this;
-    }
-
-    public function getNombre(): ?string
-    {
-        return $this->nombre;
-    }
-
-    public function setNombre(?string $nombre): static
-    {
-        $this->nombre = $nombre;
-
-        return $this;
     }
 }

@@ -1,69 +1,56 @@
 security:
-    # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
     password_hashers:
         Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
 
-    # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
     providers:
-        # used to reload user from session & other features (e.g. switch_user)
-        app_user_provider:
-            entity:
-                class: App\Entity\Usuario
-                property: username
+        in_memory:
+            memory:
+                users:
+                            admin:
+                                password: '$2y$13$ZYWZK8hlmtkt909bKaKqre8DNbH6BM2.uzX1RlQAZSfdBENNVMaKC'
+                                roles: ['ROLE_ADMIN']
+                            usuario:
+                                password: '$2y$13$ZYWZK8hlmtkt909bKaKqre8DNbH6BM2.uzX1RlQAZSfdBENNVMaKC'
+                                roles: ['ROLE_USER']
 
     firewalls:
         dev:
-            # Ensure dev tools and static assets are always allowed
             pattern: ^/(_profiler|_wdt|assets|build)/
             security: false
-        # ── NUEVO ── Login API con JWT
-        api_login:
-            pattern: ^/api/login
-            stateless: true
-            json_login:
-                check_path: /api/login
-                username_path: username
-                password_path: password
-                success_handler: lexik_jwt_authentication.handler.authentication_success
-                failure_handler: lexik_jwt_authentication.handler.authentication_failure
 
-        # ── NUEVO ── Rutas API protegidas con JWT
-        api:
-            pattern: ^/api
-            stateless: true
-            jwt: ~
-
-        # Tu firewall principal — para el dashboard web
         main:
             lazy: true
-            provider: app_user_provider
+            provider: in_memory
 
-            # Activate different ways to authenticate:
-            # https://symfony.com/doc/current/security.html#the-firewall
+            form_login:
+                login_path: app_login
+                check_path: app_login
+                username_parameter: _username
+                password_parameter: _password
+                default_target_path: dashboard
+                enable_csrf: true
 
-            # https://symfony.com/doc/current/security/impersonating_user.html
-            # switch_user: true
+            remember_me:
+                secret: '%kernel.secret%'
+                lifetime: 2592000
+                path: /
+                remember_me_parameter: _remember_me
 
-    # Note: Only the *first* matching rule is applied
+            logout:
+                path: app_logout
+                target: app_login
+
     access_control:
-     # ── NUEVO ── Rutas públicas de la API
-        - { path: ^/api/login,    roles: PUBLIC_ACCESS }
-        - { path: ^/api/registro, roles: PUBLIC_ACCESS }
-        - { path: ^/api/crear-usuario-prueba, roles: PUBLIC_ACCESS }
-
-        # ── NUEVO ── Resto de rutas API necesitan token
-        - { path: ^/api,          roles: ROLE_USER }
-        
-        # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
+        - { path: ^/login,     roles: PUBLIC_ACCESS }
+        - { path: ^/registro,  roles: PUBLIC_ACCESS }
+        - { path: ^/verificar, roles: PUBLIC_ACCESS }
+        - { path: ^/,          roles: IS_AUTHENTICATED_FULLY }
 
 when@test:
     security:
         password_hashers:
-            # Password hashers are resource-intensive by design to ensure security.
-            # In tests, it's safe to reduce their cost to improve performance.
             Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface:
                 algorithm: auto
-                cost: 4 # Lowest possible value for bcrypt
-                time_cost: 3 # Lowest possible value for argon
-                memory_cost: 10 # Lowest possible value for argon
+                cost: 4
+                time_cost: 3
+                memory_cost: 10

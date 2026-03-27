@@ -1,0 +1,186 @@
+{% extends 'base.html.twig' %}
+{% block title %}Crear cuenta{% endblock %}
+
+{% block body %}
+<div class="login-page">
+
+    <div class="login-left">
+        <div class="login-left__content">
+            <div class="login-brand">
+                <div class="login-brand__icon">
+                    <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M16 3L16 29M3 16H29M8 8L24 24M24 8L8 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <span class="login-brand__name">TRIVIUM</span>
+            </div>
+
+            <div class="login-hero">
+                <h1 class="login-hero__title">Crea tu<br>cuenta</h1>
+                <p class="login-hero__desc">Una vez registrado, recibirás un email para verificar tu dirección y activar el acceso.</p>
+            </div>
+
+            <div class="login-steps">
+                <div class="login-step">
+                    <div class="login-step__num">1</div>
+                    <span>Completa el formulario</span>
+                </div>
+                <div class="login-step">
+                    <div class="login-step__num">2</div>
+                    <span>Verifica tu email</span>
+                </div>
+                <div class="login-step">
+                    <div class="login-step__num">3</div>
+                    <span>Inicia sesión</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="login-left__bg">
+            <div class="bg-circle bg-circle--1"></div>
+            <div class="bg-circle bg-circle--2"></div>
+            <div class="bg-pulse"></div>
+        </div>
+    </div>
+
+    <div class="login-right">
+        <div class="login-card login-card--wide">
+
+            <div class="login-card__header">
+                <h2 class="login-card__title">Nueva cuenta</h2>
+                <p class="login-card__sub">Rellena los datos para registrarte en Trivium</p>
+            </div>
+
+            {{ form_start(form, {'attr': {'class': 'login-form', 'novalidate': 'novalidate'}}) }}
+
+                {% if form.vars.errors|length > 0 %}
+                    <div class="alert alert--danger" style="margin-bottom: 16px;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                        </svg>
+                        Corrige los errores antes de continuar.
+                    </div>
+                {% endif %}
+
+                <div class="form-row">
+                    <div class="form-group">
+                        {{ form_label(form.username, null, {'label_attr': {'class': 'form-label'}}) }}
+                        <div class="form-input-wrap">
+                            <svg class="form-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                <circle cx="12" cy="7" r="4"/>
+                            </svg>
+                            {{ form_widget(form.username, {'attr': {'class': 'form-input', 'placeholder': 'p.ej. maria.garcia'}}) }}
+                        </div>
+                        {{ form_errors(form.username) }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form_label(form.email, null, {'label_attr': {'class': 'form-label'}}) }}
+                        <div class="form-input-wrap">
+                            <svg class="form-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                                <polyline points="22,6 12,13 2,6"/>
+                            </svg>
+                            {{ form_widget(form.email, {'attr': {'class': 'form-input', 'placeholder': 'tu@email.com'}}) }}
+                        </div>
+                        {{ form_errors(form.email) }}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        {{ form_label(form.plainPassword.first, null, {'label_attr': {'class': 'form-label'}}) }}
+                        <div class="form-input-wrap">
+                            <svg class="form-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                            </svg>
+                            {{ form_widget(form.plainPassword.first, {'attr': {'class': 'form-input', 'placeholder': 'mín. 8 caracteres'}}) }}
+                        </div>
+                        {{ form_errors(form.plainPassword.first) }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form_label(form.plainPassword.second, null, {'label_attr': {'class': 'form-label'}}) }}
+                        <div class="form-input-wrap">
+                            <svg class="form-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                            </svg>
+                            {{ form_widget(form.plainPassword.second, {'attr': {'class': 'form-input', 'placeholder': 'repite la contraseña'}}) }}
+                        </div>
+                        {{ form_errors(form.plainPassword.second) }}
+                        {{ form_errors(form.plainPassword) }}
+                    </div>
+                </div>
+
+                <div class="password-strength" id="pw-strength">
+                    <div class="password-strength__bar">
+                        <div class="password-strength__fill" id="pw-fill"></div>
+                    </div>
+                    <span class="password-strength__label" id="pw-label">—</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-checkbox">
+                        {{ form_widget(form.aceptaTerminos, {'attr': {'class': 'form-checkbox__input'}}) }}
+                        <span class="form-checkbox__box"></span>
+                        <span class="form-checkbox__label">
+                            Acepto la <a href="#" class="login-card__link">política de privacidad</a> y los <a href="#" class="login-card__link">términos de uso</a>.
+                        </span>
+                    </label>
+                    {{ form_errors(form.aceptaTerminos) }}
+                </div>
+
+                <button type="submit" class="btn-login">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="8.5" cy="7" r="4"/>
+                        <line x1="20" y1="8" x2="20" y2="14"/>
+                        <line x1="23" y1="11" x2="17" y2="11"/>
+                    </svg>
+                    Crear cuenta
+                </button>
+
+            {{ form_end(form) }}
+
+            <div class="login-card__footer">
+                <p>¿Ya tienes cuenta? <a href="{{ path('app_login') }}" class="login-card__link">Iniciar sesión</a></p>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<script>
+const pwInput = document.querySelector('input[type="password"]');
+const fill    = document.getElementById('pw-fill');
+const label   = document.getElementById('pw-label');
+
+if (pwInput) {
+    pwInput.addEventListener('input', () => {
+        const v = pwInput.value;
+        let score = 0;
+        if (v.length >= 8)        score++;
+        if (/[A-Z]/.test(v))      score++;
+        if (/\d/.test(v))         score++;
+        if (/[^A-Za-z0-9]/.test(v)) score++;
+
+        const levels = [
+            { pct: '0%',   color: 'transparent', text: '—' },
+            { pct: '25%',  color: '#ef4444',      text: 'Débil' },
+            { pct: '50%',  color: '#f59e0b',      text: 'Regular' },
+            { pct: '75%',  color: '#3b82f6',      text: 'Buena' },
+            { pct: '100%', color: '#22c55e',       text: 'Fuerte' },
+        ];
+        const l = levels[v.length === 0 ? 0 : score];
+        fill.style.width      = l.pct;
+        fill.style.background = l.color;
+        label.textContent     = l.text;
+        label.style.color     = l.color;
+    });
+}
+</script>
+{% endblock %}

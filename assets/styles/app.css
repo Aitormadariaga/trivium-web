@@ -1869,3 +1869,227 @@ input, select, textarea { font-family: inherit; }
     .pf-radio-group { gap: 8px; }
     .pf-summary__grid { grid-template-columns: 1fr; }
 }
+
+/* ═══════════════════════════════════════════════
+   TRIVIUM — Añadir al final de app.css
+   Auth: Login remember-me + Registro
+═══════════════════════════════════════════════ */
+
+/* ── LOGIN CARD FOOTER ──────────────────────────── */
+.login-card__footer {
+    margin-top: 24px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--slate-400);
+}
+
+.login-card__link {
+    color: var(--cyan-400);
+    font-weight: 600;
+    transition: color var(--transition);
+}
+.login-card__link:hover { color: var(--cyan-300); }
+
+/* ── CHECKBOX (remember_me + términos) ──────────── */
+.form-group--inline { margin-top: -4px; }
+
+.form-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.form-checkbox__input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.form-checkbox__box {
+    width: 18px;
+    height: 18px;
+    border: 1.5px solid var(--slate-300);
+    border-radius: 4px;
+    background: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: border-color var(--transition), background var(--transition);
+}
+
+.form-checkbox__input:checked + .form-checkbox__box {
+    background: var(--cyan-400);
+    border-color: var(--cyan-400);
+}
+
+.form-checkbox__input:checked + .form-checkbox__box::after {
+    content: '';
+    display: block;
+    width: 10px;
+    height: 6px;
+    border: 2px solid var(--navy-950);
+    border-top: none;
+    border-right: none;
+    transform: rotate(-45deg) translateY(-1px);
+}
+
+.form-checkbox__label {
+    font-size: 13px;
+    color: var(--slate-600);
+    line-height: 1.4;
+}
+
+/* ── ROLE SELECTOR (registro) ───────────────────── */
+.role-selector {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.role-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border: 1.5px solid var(--slate-200);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: border-color var(--transition), background var(--transition);
+    background: var(--white);
+}
+
+.role-option:hover {
+    border-color: var(--slate-300);
+    background: var(--slate-50, #f8fafc);
+}
+
+.role-option.is-selected {
+    border-color: var(--cyan-400);
+    background: rgba(34,211,238,.06);
+}
+
+.role-option svg {
+    width: 22px;
+    height: 22px;
+    color: var(--slate-400);
+    flex-shrink: 0;
+    transition: color var(--transition);
+}
+
+.role-option.is-selected svg { color: var(--cyan-500); }
+
+.role-option div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.role-option strong {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--slate-800);
+}
+
+.role-option span {
+    font-size: 12px;
+    color: var(--slate-400);
+}
+
+/* ── FORM ROW (2 columnas) ──────────────────────── */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+@media (max-width: 640px) {
+    .form-row { grid-template-columns: 1fr; }
+    .role-selector { grid-template-columns: 1fr; }
+}
+
+/* ── CARD WIDE (registro) ───────────────────────── */
+.login-card--wide {
+    max-width: 560px;
+    width: 100%;
+}
+
+/* ── PASSWORD STRENGTH ──────────────────────────── */
+.password-strength {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: -8px;
+    margin-bottom: 4px;
+}
+
+.password-strength__bar {
+    flex: 1;
+    height: 4px;
+    background: var(--slate-200);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.password-strength__fill {
+    height: 100%;
+    width: 0%;
+    border-radius: 2px;
+    transition: width 0.3s ease, background 0.3s ease;
+}
+
+.password-strength__label {
+    font-size: 12px;
+    font-weight: 600;
+    min-width: 52px;
+    text-align: right;
+    transition: color 0.3s ease;
+}
+
+/* ── REGISTRO STEPS (panel izquierdo) ───────────── */
+.login-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 40px;
+}
+
+.login-step {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 14px;
+    color: rgba(255,255,255,.7);
+}
+
+.login-step__num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(34,211,238,.2);
+    color: var(--cyan-400);
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* ── FORM ERRORS ────────────────────────────────── */
+.form-error,
+ul.form-errors li,
+.form-errors li {
+    font-size: 12px;
+    color: var(--red-500);
+    margin-top: 4px;
+    display: block;
+}
+
+ul.form-errors {
+    list-style: none;
+    padding: 0;
+}

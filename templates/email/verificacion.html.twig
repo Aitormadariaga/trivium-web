@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verifica tu cuenta en Trivium</title>
+    <!--[if mso]><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml><![endif]-->
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #f1f5f9; color: #334155; }
+        a { color: #22d3ee; text-decoration: none; }
+    </style>
+</head>
+<body style="background:#f1f5f9; padding: 40px 16px;">
+
+    <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+        <tr>
+            <td align="center">
+
+                {# ── Contenedor principal ── #}
+                <table width="560" cellpadding="0" cellspacing="0" role="presentation" style="max-width:560px; width:100%;">
+
+                    {# ── Cabecera / Brand ── #}
+                    <tr>
+                        <td style="background:#060d1a; border-radius:12px 12px 0 0; padding:28px 40px;">
+                            <table cellpadding="0" cellspacing="0" role="presentation">
+                                <tr>
+                                    <td style="padding-right:12px;">
+                                        <div style="width:36px; height:36px; background:#22d3ee; border-radius:8px; display:flex; align-items:center; justify-content:center; text-align:center; line-height:36px;">
+                                            <span style="font-size:20px; font-weight:800; color:#060d1a;">✕</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span style="font-size:20px; font-weight:800; letter-spacing:0.12em; color:#ffffff;">TRIVIUM</span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    {# ── Cuerpo ── #}
+                    <tr>
+                        <td style="background:#ffffff; padding:40px;">
+
+                            {# Icono de verificación #}
+                            <div style="text-align:center; margin-bottom:28px;">
+                                <div style="width:64px; height:64px; border-radius:50%; background:#e1f5f9; display:inline-block; line-height:64px; text-align:center;">
+                                    <span style="font-size:28px;">✉️</span>
+                                </div>
+                            </div>
+
+                            <h1 style="font-size:22px; font-weight:700; color:#0f172a; text-align:center; margin-bottom:12px;">
+                                Verifica tu dirección de email
+                            </h1>
+
+                            <p style="font-size:15px; line-height:1.7; color:#475569; text-align:center; margin-bottom:8px;">
+                                Hola <strong>{{ usuario.username }}</strong>,
+                            </p>
+
+                            <p style="font-size:15px; line-height:1.7; color:#475569; text-align:center; margin-bottom:32px;">
+                                Gracias por registrarte en Trivium. Haz clic en el botón de abajo para verificar tu cuenta y comenzar a usar la plataforma.
+                            </p>
+
+                            {# CTA Button #}
+                            <div style="text-align:center; margin-bottom:32px;">
+                                <a href="{{ verification_url }}"
+                                   style="display:inline-block; background:#060d1a; color:#22d3ee; font-size:15px; font-weight:700; padding:14px 36px; border-radius:8px; letter-spacing:0.02em; text-decoration:none;">
+                                    Verificar mi cuenta
+                                </a>
+                            </div>
+
+                            {# Enlace alternativo #}
+                            <div style="background:#f8fafc; border-radius:8px; padding:16px; margin-bottom:28px;">
+                                <p style="font-size:12px; color:#64748b; margin-bottom:8px;">
+                                    Si el botón no funciona, copia y pega este enlace en tu navegador:
+                                </p>
+                                <p style="font-size:12px; color:#22d3ee; word-break:break-all;">
+                                    {{ verification_url }}
+                                </p>
+                            </div>
+
+                            {# Aviso de seguridad #}
+                            <p style="font-size:13px; line-height:1.6; color:#94a3b8; text-align:center;">
+                                Si no has creado esta cuenta, ignora este mensaje.<br>
+                                Este enlace es de un solo uso y expira en 24 horas.
+                            </p>
+
+                        </td>
+                    </tr>
+
+                    {# ── Footer ── #}
+                    <tr>
+                        <td style="background:#f8fafc; border-radius:0 0 12px 12px; padding:20px 40px; text-align:center; border-top:1px solid #e2e8f0;">
+                            <p style="font-size:12px; color:#94a3b8; margin-bottom:4px;">
+                                Trivium · Panel de Gestión Clínica
+                            </p>
+                            <p style="font-size:11px; color:#cbd5e1;">
+                                Este email fue enviado automáticamente. Por favor no respondas a este mensaje.
+                            </p>
+                        </td>
+                    </tr>
+
+                </table>
+
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>
